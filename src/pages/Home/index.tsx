@@ -41,7 +41,7 @@ export function Home() {
       </VStack>
 
       {teams ? (
-        <SimpleGrid w="100%" columns={4} spacing={8} my={10}>
+        <SimpleGrid w="100%" columns={4} spacing={6} my={10}>
           {teams?.map((team) => (
             <CardTeam key={team.id} id={team.id} name={team.name} />
           ))}

@@ -1,15 +1,14 @@
 import {
   Avatar,
   Box,
-  Button,
   Flex,
   Heading,
   Skeleton,
   SkeletonCircle,
-  SkeletonText,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../../../services/api";
 import { Team } from "../../../types/Team";
 import { User } from "../../../types/User";
@@ -35,17 +34,20 @@ export function CardTeam({ id, name }: CardTeamProps) {
   return (
     <Flex
       width="100%"
-      height="110px"
+      height="130px"
       borderRadius={"md"}
       borderColor="gray.200"
       borderWidth={"1px"}
       p={4}
       direction="column"
+      justifyContent="space-around"
       gap={5}
     >
-      <Heading as="p" fontSize={"md"} color="blue.800">
-        {name}
-      </Heading>
+      <Link to={`teams/${id}`}>
+        <Heading as="p" fontSize={"md"} color="blue.800">
+          {name}
+        </Heading>
+      </Link>
 
       {teamLead ? (
         <Flex>
