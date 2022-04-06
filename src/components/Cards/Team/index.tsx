@@ -1,11 +1,41 @@
-import { ViewIcon } from "@chakra-ui/icons";
-import { Avatar, Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Skeleton,
+  SkeletonCircle,
+  SkeletonText,
+  Text,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { api } from "../../../services/api";
+import { Team } from "../../../types/Team";
+import { User } from "../../../types/User";
 
-export function CardTeam() {
+interface CardTeamProps {
+  id: string;
+  name: string;
+}
+
+export function CardTeam({ id, name }: CardTeamProps) {
+  const [teamLead, setTeamLead] = useState<User>();
+
+  useEffect(() => {
+    api.get(`/teams/${id}`).then((response) => {
+      const { teamLeadId }: Team = response.data;
+
+      api
+        .get(`/users/${teamLeadId}`)
+        .then((response) => setTeamLead(response.data));
+    });
+  }, [id]);
+
   return (
     <Flex
       width="100%"
-      height="160px"
+      height="110px"
       borderRadius={"md"}
       borderColor="gray.200"
       borderWidth={"1px"}
@@ -13,37 +43,38 @@ export function CardTeam() {
       direction="column"
       gap={5}
     >
-      <Heading as="p" fontSize={"lg"} color="gray.900">
-        Braddock
+      <Heading as="p" fontSize={"md"} color="blue.800">
+        {name}
       </Heading>
 
-      <Flex>
-        <Avatar size="sm" name="John Doe" />
-        <Box ml="3">
-          <Text fontWeight="bold" color="gray.900" fontSize="sm">
-            Leonardo Alves
-          </Text>
-          <Text fontSize="xs" color="gray.600">
-            Team Leader
-          </Text>
-        </Box>
-      </Flex>
-
-      <Button
-        as="a"
-        size="sm"
-        href="/team/:id"
-        borderRadius="md"
-        color="gray.900"
-        _hover={{
-          background: "blue.900",
-          color: "white",
-        }}
-        variant="ghost"
-        p={2}
-      >
-        See all members
-      </Button>
+      {teamLead ? (
+        <Flex>
+          <Avatar
+            size="sm"
+            name={`${teamLead.firstName} ${teamLead.lastName}`}
+            bg="gray.200"
+            color="gray.900"
+          />
+          <Box ml="3">
+            <Text
+              fontWeight="bold"
+              color="gray.900"
+              fontSize="sm"
+            >{`${teamLead.firstName} ${teamLead.lastName}`}</Text>
+            <Text fontSize="xs" color="gray.600">
+              Team Leader
+            </Text>
+          </Box>
+        </Flex>
+      ) : (
+        <Flex w="100%">
+          <SkeletonCircle />
+          <Flex direction={"column"}>
+            <Skeleton w="130px" h="12px" ml={2} />
+            <Skeleton w="100px" h="10px" ml={2} mt={2} />
+          </Flex>
+        </Flex>
+      )}
     </Flex>
   );
 }
