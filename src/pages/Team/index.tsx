@@ -1,7 +1,6 @@
 import { Flex, Heading } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { FilterForm } from "../../components/FilterForm";
 import { UserAvatar } from "../../components/UserAvatar";
 import { api } from "../../services/api";
 import { Team } from "../../types/Team";
@@ -50,12 +49,10 @@ export function TeamDetails() {
 
       <UserAvatar user={teamLead as User} size="md" />
 
-      <Flex w="100%" direction="column" gap={4}>
+      <Flex w="100%" direction="column" gap={2}>
         <Heading as="p" size="md">
           Team Members
         </Heading>
-
-        <FilterForm />
 
         <MembersList membersIds={team?.teamMemberIds} />
       </Flex>
