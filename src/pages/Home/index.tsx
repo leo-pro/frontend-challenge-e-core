@@ -1,14 +1,8 @@
-import {
-  Flex,
-  SimpleGrid,
-  Heading,
-  VStack,
-  Spinner,
-  Skeleton,
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { Flex, SimpleGrid, Heading, VStack, Spinner } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
 import { CardTeam } from "../../components/Cards/Team";
-import { FilterForm } from "../../components/FilterForm";
+import { FilterInput } from "../../components/FilterInput";
+import useDebounce from "../../hooks/useDebounce";
 import { api } from "../../services/api";
 
 interface Team {
@@ -17,7 +11,10 @@ interface Team {
 }
 
 export function Home() {
+  const [filterInput, setFilterInput] = useState("");
   const [teams, setTeams] = useState<Team[]>();
+
+  const debouncedValue = useDebounce(filterInput, 500);
 
   useEffect(() => {
     api
@@ -25,6 +22,14 @@ export function Home() {
       .then((response) => setTeams(response.data))
       .catch((error) => console.log(error));
   }, []);
+
+  const filteredTeams = useMemo(() => {
+    const searchLowerCase = debouncedValue.toLowerCase();
+
+    return teams?.filter((team) =>
+      team.name.toLowerCase().includes(searchLowerCase)
+    );
+  }, [debouncedValue, teams]);
 
   return (
     <Flex
@@ -37,12 +42,15 @@ export function Home() {
         <Heading as="h1" size="xl">
           Find your team
         </Heading>
-        <FilterForm />
+        <FilterInput
+          value={filterInput}
+          onChange={(searchValue) => setFilterInput(searchValue)}
+        />
       </VStack>
 
-      {teams ? (
+      {filteredTeams ? (
         <SimpleGrid w="100%" columns={4} spacing={6} my={10}>
-          {teams?.map((team) => (
+          {filteredTeams?.map((team) => (
             <CardTeam key={team.id} id={team.id} name={team.name} />
           ))}
         </SimpleGrid>
