@@ -1,7 +1,10 @@
 import { Flex, SimpleGrid, Spinner } from "@chakra-ui/react";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CardUser } from "../../../components/Cards/User";
+import { FilterInput } from "../../../components/FilterInput";
+import { API_URL } from "../../../constants";
+import useDebounce from "../../../hooks/useDebounce";
 import { User } from "../../../types/User";
 
 interface MembersListProps {
@@ -9,7 +12,10 @@ interface MembersListProps {
 }
 
 export function MembersList({ membersIds }: MembersListProps) {
+  const [filterInput, setFilterInput] = useState<string>("");
   const [members, setMembers] = useState<User[]>();
+
+  const debouncedValue = useDebounce(filterInput, 500);
 
   useEffect(() => {
     if (membersIds) {
@@ -21,8 +27,7 @@ export function MembersList({ membersIds }: MembersListProps) {
     let teamMembers: User[] = [];
 
     const membersEndpoints = membersIds.map(
-      (member) =>
-        `https://cgjresszgg.execute-api.eu-west-1.amazonaws.com/users/${member}`
+      (member) => `${API_URL}/users/${member}`
     );
 
     axios
@@ -31,15 +36,33 @@ export function MembersList({ membersIds }: MembersListProps) {
         data.map((response) => teamMembers.push(response.data));
       })
       .finally(() => {
-        setMembers(teamMembers);
+        const formattedMembersData = teamMembers.map((teamMember) => {
+          return {
+            ...teamMember,
+            fullName: `${teamMember.firstName} ${teamMember.lastName}`,
+          };
+        });
+        setMembers(formattedMembersData);
       });
   }
 
+  const membersFiltered = useMemo(() => {
+    const lowerSearch = debouncedValue.toLowerCase();
+
+    return members?.filter((member) =>
+      member.fullName?.toLowerCase().includes(lowerSearch)
+    );
+  }, [debouncedValue, members]);
+
   return (
     <>
-      {members ? (
-        <SimpleGrid w="100%" columns={4} spacing={6} my={6}>
-          {members?.map((member) => (
+      <FilterInput
+        value={filterInput}
+        onChange={(search) => setFilterInput(search)}
+      />
+      {membersFiltered ? (
+        <SimpleGrid w="100%" columns={4} spacing={6} my={4}>
+          {membersFiltered?.map((member) => (
             <CardUser key={member.id} user={member} />
           ))}
         </SimpleGrid>

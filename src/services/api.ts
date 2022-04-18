@@ -1,5 +1,6 @@
 import axios from "axios";
+import { API_URL } from "../constants";
 
 export const api = axios.create({
-  baseURL: "https://cgjresszgg.execute-api.eu-west-1.amazonaws.com",
+  baseURL: API_URL,
 });

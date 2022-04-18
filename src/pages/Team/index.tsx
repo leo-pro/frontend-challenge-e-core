@@ -49,7 +49,7 @@ export function TeamDetails() {
 
       <UserAvatar user={teamLead as User} size="md" />
 
-      <Flex w="100%" direction="column" gap={2}>
+      <Flex w="100%" direction="column" gap={4}>
         <Heading as="p" size="md">
           Team Members
         </Heading>
