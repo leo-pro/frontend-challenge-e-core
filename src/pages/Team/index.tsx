@@ -1,6 +1,13 @@
-import { Flex, Heading } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Flex,
+  Heading,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { UserAvatar } from "../../components/UserAvatar";
 import { api } from "../../services/api";
 import { Team } from "../../types/Team";
@@ -10,13 +17,17 @@ import { MembersList } from "./components/MembersList";
 export function TeamDetails() {
   const [team, setTeam] = useState<Team>();
   const [teamLead, setTeamLead] = useState<User>();
+  const [isError, setIsError] = useState<boolean>(false);
 
   const { id } = useParams();
 
   useEffect(() => {
     if (id) {
-      getTeamById(id);
-      getTeamLeadById(team?.teamLeadId as string);
+      getTeamById(id as string);
+
+      if (team?.teamLeadId) {
+        getTeamLeadById(team?.teamLeadId as string);
+      }
     }
   }, [id, team?.teamLeadId]);
 
@@ -24,6 +35,10 @@ export function TeamDetails() {
     api
       .get(`/teams/${teamId}`)
       .then((response) => {
+        if (!response.data) {
+          setIsError(true);
+          return;
+        }
         setTeam(response.data);
       })
       .catch((error) => console.log(error));
@@ -43,19 +58,31 @@ export function TeamDetails() {
       direction={"column"}
       gap={10}
     >
-      <Heading as="h1" size="xl">
-        {team?.name}
-      </Heading>
+      {isError ? (
+        <Alert status="error">
+          <AlertIcon />
+          <AlertTitle>Team ID not found!</AlertTitle>
+          <AlertDescription>
+            Please, <Link to="/">click here</Link> and return to homepage.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          <Heading as="h1" size="xl">
+            {team?.name}
+          </Heading>
 
-      <UserAvatar user={teamLead as User} size="md" />
+          <UserAvatar user={teamLead as User} size="md" />
 
-      <Flex w="100%" direction="column" gap={4}>
-        <Heading as="p" size="md">
-          Team Members
-        </Heading>
+          <Flex w="100%" direction="column" gap={4}>
+            <Heading as="p" size="md">
+              Team Members
+            </Heading>
 
-        <MembersList membersIds={team?.teamMemberIds} />
-      </Flex>
+            <MembersList membersIds={team?.teamMemberIds} />
+          </Flex>
+        </>
+      )}
     </Flex>
   );
 }
